@@ -1,9 +1,12 @@
 import React from 'react';
-import { Text, View, SafeAreaView } from 'react-native';
-import homeStyle from '../styles/style-home.js';
+import { Text, SafeAreaView, View, List, FlatList } from 'react-native';
 import Login from '../views/Login.js'
 import {getTop} from "../services/api.js";
+import TopMenu from "../includes/TopMenu.js";
+import Card from "../includes/Card.js";
 
+//style
+import globalStyle from '../styles/style-global.js'
 
 class Tracks extends React.Component {
 
@@ -14,25 +17,44 @@ class Tracks extends React.Component {
             profileLoaded: false,
             access_token: null,
             dataLoaded: [],
+            timeRangeSelected : "short_term"
         }
+        this.rangeChange = this.rangeChange.bind(this);
     }
 
+
+    componentDidMount(){
+        this.loadData();
+    }
     
-    /*
+    /*  
     |
     | -- Query on API
     |
     */
-    loadData() {
-        getTop(this.state.access_token).then(result => {
-            console.log('resulat requete :', result.items)
+    loadData(newRange) {
+
+        let time_range;
+
+        //Check if range is specified (click on menu top)
+        if(newRange){ 
+            time_range = newRange
+        } else {
+            time_range = this.state.timeRangeSelected;
+        }
+
+        this.setState({
+            isLoading: true,
+        })
+
+        getTop(time_range).then(result => {
             this.setState({
                 dataLoaded : result.items,
                 isLoading : false,
             })
         })
-    }
 
+    }
 
     /*
     |
@@ -50,26 +72,40 @@ class Tracks extends React.Component {
         this.loadData();
     }
 
+
+    /*
+    |
+    | -- Change value range
+    |
+    */
+    rangeChange = (newRange) => {
+
+        //Go Query
+        this.loadData(newRange);
+    }
+
+
     
     render() {
-        return (
-            <SafeAreaView style={homeStyle.container}>
-                {this.state.profileLoaded ? 
-                        
-                        this.state.isLoading ? 
-                        <Text>Chargement de vos données</Text>
-                        : 
-                        this.state.dataLoaded.map( (item, i) => {
-                            console.log('item',item.album.artists[0].name)
-                            return(
-                                <Text key={i}>{item.name}</Text>
-                            )
-                        })
-                    :
-                    <Login updateData={val => this.updateData(val)} />
-                }
-            </SafeAreaView>
+        return ( 
+            <SafeAreaView style={globalStyle.container}>
 
+                <TopMenu onUpdate={this.rangeChange}/>     
+
+                <View style={[globalStyle.offsetTop, globalStyle.container]}>
+                    {this.state.isLoading ? 
+                    <Text>Chargement de vos données</Text>
+                    : 
+                    <View style={globalStyle.listContainer}>
+                        <FlatList
+                            data={this.state.dataLoaded}
+                            renderItem={({item, index}) => <Card datas={item} id={index}></Card>}
+                            keyExtractor={item => item.id}
+                        />
+                    </View>
+                    }
+                </View>
+            </SafeAreaView>
         );
     }
 }

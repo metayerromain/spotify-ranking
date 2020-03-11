@@ -1,11 +1,25 @@
 import React from 'react';
-import { Text, View, Button, SafeAreaView } from 'react-native';
+import { TouchableOpacity, AsyncStorage, ImageBackground, Text } from 'react-native';
+
+import AppContext from '../context/AppContext';
+
 import { AuthSession } from 'expo';
 const SPOTIFY_APP_ID = '032847b9064643bbb459528d0ab2012a';
 
+import loginStyle from '../styles/style-login.js'
+
+/*
+|
+| -- Get Date
+|
+*/
+const now = Math.floor(Date.now() / 1000) + 3600;
+const expiresDate = Math.floor(now + 3600);
 
 
 class Login extends React.Component {
+
+    static contextType = AppContext;
 
     constructor(props){
         super(props);
@@ -14,7 +28,12 @@ class Login extends React.Component {
         }
     }
 
-    //Connexion à l'authentification Spotify
+
+    /*
+    |
+    | -- Connexion à l'authentification Spotify
+    |
+    */
     _handlePressAsync = async () => {
         let redirectUrl = AuthSession.getRedirectUrl(); 
         let result = await AuthSession.startAsync(
@@ -30,19 +49,44 @@ class Login extends React.Component {
             }
         );
 
+        
+        /*
+        |
+        | -- Set token in Storage App
+        |
+        */
+        let token = await AsyncStorage.getItem("access_token_expires");
 
-        this.setState({ 
-            access_token : result.params.access_token,
-            profileLoaded: true 
-        });
+        if(token === null){
+            AsyncStorage.setItem('access_token_expires', JSON.stringify(expiresDate));
+            //save the token
+            AsyncStorage.setItem('access_token', result.params.access_token);
 
-        this.props.updateData(this.state.access_token)
+        }
+        else{
+            AsyncStorage.removeItem('access_token_expires');
+            AsyncStorage.setItem('access_token_expires', JSON.stringify(expiresDate));
+            //save the token
+            AsyncStorage.setItem('access_token', result.params.access_token);
+        }
+
+
+        /*
+        |
+        | -- Set Context to connected
+        |
+        */
+       this.context.setToken(true);
 
     };
 
     render(){
         return(
-            <Button title="Connexion à Spotify" onPress={this._handlePressAsync} />
+            <ImageBackground source={require('../../assets/background-login.png')} style={loginStyle.background}>
+                <TouchableOpacity style={loginStyle.button} onPress={this._handlePressAsync}>
+                    <Text style={loginStyle.text}>Connexion à Spotify</Text>
+                </TouchableOpacity>
+          </ImageBackground>
         )
     }
 
