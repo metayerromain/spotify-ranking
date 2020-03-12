@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, AsyncStorage, ImageBackground, Text } from 'react-native';
+import { TouchableOpacity, AsyncStorage, SafeAreaView, Text, View, Image} from 'react-native';
 
 import AppContext from '../context/AppContext';
 
@@ -7,6 +7,7 @@ import { AuthSession } from 'expo';
 const SPOTIFY_APP_ID = '032847b9064643bbb459528d0ab2012a';
 
 import loginStyle from '../styles/style-login.js'
+
 
 /*
 |
@@ -82,11 +83,25 @@ class Login extends React.Component {
 
     render(){
         return(
-            <ImageBackground source={require('../../assets/background-login.png')} style={loginStyle.background}>
-                <TouchableOpacity style={loginStyle.button} onPress={this._handlePressAsync}>
-                    <Text style={loginStyle.text}>Connexion à Spotify</Text>
-                </TouchableOpacity>
-          </ImageBackground>
+
+            <View style={loginStyle.bigContainer}>
+
+                <View style={loginStyle.container}>
+                    <Image source={require('../../assets/background-login.png')} style={loginStyle.image}></Image>
+                </View>
+
+                <View style={loginStyle.textContainer}>
+                    <View style={loginStyle.titleContainer}>
+                        <Text style={loginStyle.title}>Découvrez vos top sur Spotify </Text>
+                    </View>
+                    <TouchableOpacity style={loginStyle.button} onPress={this._handlePressAsync}>
+                        <Text style={loginStyle.buttonText}>Connectez-vous</Text>
+                    </TouchableOpacity>
+                </View>
+
+            </View>
+
+                
         )
     }
 

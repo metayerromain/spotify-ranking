@@ -1,21 +1,19 @@
 import React from 'react';
-import { SafeAreaView, AsyncStorage, Text, View } from 'react-native';
+import { AsyncStorage, View } from 'react-native';
 
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import AppContext from './src/context/AppContext';
 
 import {isConnected} from "./src/services/isConnected";
 
-import Tracks from './src/views/Tracks.js';
-import Artists from './src/views/Artists.js';
+import Home from './src/views/Home.js';
 import Login from './src/views/Login.js'
 
-// const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
 class App extends React.Component {
 
@@ -56,9 +54,10 @@ class App extends React.Component {
     |
     */
 	async componentDidMount(){
+		// AsyncStorage.removeItem("access_token");
 		let access_token = await AsyncStorage.getItem("access_token");
 
-		var nonExpired = isConnected();
+		var nonExpired = await isConnected();
 
 		if(access_token === null){
 
@@ -66,44 +65,74 @@ class App extends React.Component {
 				already_connected : false,
 			})
 
+
 		/*
 		|
 		| -- If token is in time and exists
 		|
 		*/
 		} else if(access_token && nonExpired){
-
 			this.setState({
 				already_connected : true,
 			})
-
 		}
 	}
 
 
 	render(){
 
-		// const Tabe = () => {
-		// 	return (
-			// <NavigationContainer>
-				// <Stack.Navigator>
-				// 	<Stack.Screen name="Tracks" component={Tracks} />
-				// 	<Stack.Screen name="Artists" component={Artists} />
-				// </Stack.Navigator>
-			// </NavigationContainer>
-		// 	)
-		// }
+		const Nav = () => {
+			return (
+			<NavigationContainer>
+				<Tab.Navigator 
+					screenOptions={({ route }) => ({
+						tabBarIcon: ({ focused, color, size }) => {
+						let iconName;
+			
+						if (route.name === 'Top tracks') {
+							iconName = 'ios-musical-notes';
+							return <Ionicons name={iconName} size={size} color={color} />;
+						} else if (route.name === 'Top artists') {
+							iconName = 'artist';
+							return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+						}},
+					})}
+					initialRouteName="Tracks"
+					tabBarOptions={{
+						activeTintColor: "#50496D",
+						inactiveTintColor: "#ABA5C3",
+						labelStyle: {
+							fontSize: 14,
+						},
+						style: {
+							shadowColor: "#000",
+							shadowOffset: {
+								width: 0,
+								height: 10,
+							},
+							shadowOpacity: 0.53,
+							shadowRadius: 13.97,
+
+							elevation: 21,
+						},
+					}}
+				>
+					<Tab.Screen name="Top tracks" initialParams={{ type: 'tracks' }} component={Home}/>
+					<Tab.Screen name="Top artists" initialParams={{ type: 'artists' }} component={Home} />
+				</Tab.Navigator>
+			</NavigationContainer>
+			)
+		}
+		
+
 		return (
 			<AppContext.Provider value={this.state}>
-				<View>
-					{ this.state.already_connected || this.state.connected ?  
-						<SafeAreaView>
-							<Tracks/>
-							{/* <Tabe/> */}
-						</SafeAreaView>
-						:
+				<View style = {{flex: 1}}>
+					{ this.state.already_connected || this.state.connected ? (
+						<Nav />
+					):( 
 						<Login />
-					}
+					)}
 				</View>
 			</AppContext.Provider>
 		  );

@@ -1,14 +1,15 @@
 import React from 'react';
-import { Text, SafeAreaView, View, List, FlatList } from 'react-native';
-import Login from '../views/Login.js'
+import { Text, SafeAreaView, View, FlatList } from 'react-native';
 import {getTop} from "../services/api.js";
 import TopMenu from "../includes/TopMenu.js";
 import Card from "../includes/Card.js";
+import ModalArtist from "../includes/Modal.js";
 
 //style
 import globalStyle from '../styles/style-global.js'
 
-class Tracks extends React.Component {
+
+class Home extends React.Component {
 
     constructor(props){
         super(props);
@@ -17,12 +18,14 @@ class Tracks extends React.Component {
             profileLoaded: false,
             access_token: null,
             dataLoaded: [],
-            timeRangeSelected : "short_term"
+            timeRangeSelected : "short_term",
+            modalVisible: false,
         }
         this.rangeChange = this.rangeChange.bind(this);
+        this.setModalVisible = this.setModalVisible.bind(this);
     }
 
-
+    
     componentDidMount(){
         this.loadData();
     }
@@ -35,6 +38,7 @@ class Tracks extends React.Component {
     loadData(newRange) {
 
         let time_range;
+        let type = this.props.route.params.type;
 
         //Check if range is specified (click on menu top)
         if(newRange){ 
@@ -47,29 +51,13 @@ class Tracks extends React.Component {
             isLoading: true,
         })
 
-        getTop(time_range).then(result => {
+        getTop(time_range, type).then(result => {
             this.setState({
                 dataLoaded : result.items,
                 isLoading : false,
             })
         })
 
-    }
-
-    /*
-    |
-    | -- Get access Token
-    |
-    */
-    updateData = (data) => {
-
-        this.setState({
-            access_token : data,
-            profileLoaded: true,
-        })
-
-        //Go Query
-        this.loadData();
     }
 
 
@@ -85,10 +73,26 @@ class Tracks extends React.Component {
     }
 
 
+    /*
+    |
+    | -- Display Modal
+    |
+    */
+    setModalVisible(id) {
+        this.setState({modalVisible: !this.state.modalVisible});
+        this.setState({
+            artistId : id,
+        })
+    }
     
     render() {
-        return ( 
+        return (  
             <SafeAreaView style={globalStyle.container}>
+                 
+                {this.state.modalVisible ? (
+                    <ModalArtist isVisible={this.state.modalVisible} id={this.state.artistId} closeModal={this.setModalVisible} />
+                ):(()=>{ return <Text>No Popup</Text>}) 
+                }
 
                 <TopMenu onUpdate={this.rangeChange}/>     
 
@@ -99,7 +103,9 @@ class Tracks extends React.Component {
                     <View style={globalStyle.listContainer}>
                         <FlatList
                             data={this.state.dataLoaded}
-                            renderItem={({item, index}) => <Card datas={item} id={index}></Card>}
+                            renderItem={({item, index}) => {
+                                return <Card datas={item} type={this.props.route.params.type} id={index} setModal={this.setModalVisible}></Card>
+                            }}
                             keyExtractor={item => item.id}
                         />
                     </View>
@@ -110,4 +116,4 @@ class Tracks extends React.Component {
     }
 }
 
-export default Tracks;
+export default Home;

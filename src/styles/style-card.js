@@ -10,7 +10,8 @@ const cardStyle = StyleSheet.create({
         paddingBottom: 15,
         paddingTop: 15,
         position: 'relative',
-        paddingLeft: 35
+        paddingLeft: 35,
+        width: '100%'
     },
     indexContainer: {
         position: 'absolute',
@@ -33,7 +34,6 @@ const cardStyle = StyleSheet.create({
     },
     title: {
         fontWeight: '900',
-        color: primaryColor,
     },
     name: {
         marginTop: 5,

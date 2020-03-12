@@ -7,10 +7,22 @@ import topMenu from '../styles/style-top-menu.js'
 
 class TopMenu extends React.Component {
 
-    handlePress = (newRange) => {
-        this.props.onUpdate(newRange)
+    constructor(props){
+        super(props);
+
+        this.state = {
+            active : 1,
+        }
     }
 
+    handlePress = (newRange, idActive) => {
+        this.props.onUpdate(newRange)
+
+        this.setState({
+            active : idActive,
+        })
+
+    }
 
     render(){
         return(
@@ -18,16 +30,16 @@ class TopMenu extends React.Component {
 
                 <View style={topMenu.containerInner}>
 
-                    <TouchableOpacity style={topMenu.button} onPress={this.handlePress.bind(this,'short_term')}>
-                        <Text>Le mois dernier</Text>
+                    <TouchableOpacity onPress={this.handlePress.bind(this,'short_term', 1)}>
+                        <Text style={this.state.active == 1 ? topMenu.activeButton : topMenu.button}>Le mois dernier</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={topMenu.button} onPress={this.handlePress.bind(this,'medium_term')}>
-                        <Text>6 derniers mois</Text>
+                    <TouchableOpacity onPress={this.handlePress.bind(this,'medium_term', 2)}>
+                        <Text style={this.state.active == 2 ? topMenu.activeButton : topMenu.button}>6 derniers mois</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={topMenu.button} onPress={this.handlePress.bind(this,'long_term')}>
-                        <Text>Tout le temps</Text>
+                    <TouchableOpacity onPress={this.handlePress.bind(this,'long_term', 3)}>
+                        <Text style={this.state.active == 3 ? topMenu.activeButton : topMenu.button}>Tout le temps</Text>
                     </TouchableOpacity>
 
                 </View>
